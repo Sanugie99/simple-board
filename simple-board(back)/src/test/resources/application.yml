@@ -1,0 +1,54 @@
+spring:
+  application:
+    name: simple-board-test
+  
+  # H2 Database Configuration (테스트용)
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 
+  
+  h2:
+    console:
+      enabled: false
+  
+  # JPA Configuration
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+
+# JWT Configuration
+jwt:
+  secret: test-secret-key-for-testing-only-make-it-long-enough-for-testing
+  expiration: 3600000
+
+# AWS S3 Configuration (테스트용)
+cloud:
+  aws:
+    credentials:
+      access-key: test-access-key
+      secret-key: test-secret-key
+    region:
+      static: ap-northeast-2
+    s3:
+      bucket: test-bucket
+
+# Server Configuration
+server:
+  port: 0
+  servlet:
+    context-path: /api
+
+# CORS Configuration
+  web:
+    cors:
+      allowed-origins: http://localhost:3000
+      allowed-methods: GET,POST,PUT,DELETE,OPTIONS
+      allowed-headers: "*"
+      allow-credentials: true 

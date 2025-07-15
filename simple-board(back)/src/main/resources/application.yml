@@ -1,0 +1,68 @@
+spring:
+  application:
+    name: simple-board
+  
+  # H2 Database Configuration (개발용)
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 
+  
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  
+  # JPA Configuration
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  
+  # Email Configuration (Gmail SMTP)
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: your-email@gmail.com
+    password: your-app-password
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+# JWT Configuration
+jwt:
+  secret: your-secret-key-here-make-it-long-and-secure-for-production
+  expiration: 86400000
+
+# AWS S3 Configuration
+cloud:
+  aws:
+    credentials:
+      access-key: your-access-key
+      secret-key: your-secret-key
+    region:
+      static: ap-northeast-2
+    s3:
+      bucket: your-bucket-name
+
+# Server Configuration
+server:
+  port: 10000
+  servlet:
+    context-path: /api
+
+# CORS Configuration
+  web:
+    cors:
+      allowed-origins: http://localhost:3000
+      allowed-methods: GET,POST,PUT,DELETE,OPTIONS
+      allowed-headers: "*"
+      allow-credentials: true 
