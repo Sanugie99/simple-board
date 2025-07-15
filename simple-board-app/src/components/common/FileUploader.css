@@ -1,0 +1,161 @@
+.file-uploader {
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  background-color: #fafafa;
+  transition: border-color 0.3s ease;
+}
+
+.file-uploader:hover {
+  border-color: #007bff;
+}
+
+.file-uploader-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.file-input-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+}
+
+.file-input-label:hover {
+  background-color: #0056b3;
+}
+
+.upload-icon {
+  font-size: 18px;
+}
+
+.file-input {
+  display: none;
+}
+
+.file-info {
+  color: #666;
+  font-size: 14px;
+}
+
+.error-messages {
+  margin-bottom: 15px;
+}
+
+.error-message {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 10px 15px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.error-close {
+  background: none;
+  border: none;
+  color: #721c24;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 10px;
+}
+
+.error-close:hover {
+  color: #491217;
+}
+
+.file-list {
+  border-top: 1px solid #ddd;
+  padding-top: 15px;
+}
+
+.file-list h4 {
+  margin: 0 0 10px 0;
+  color: #333;
+  font-size: 16px;
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: white;
+  padding: 10px 15px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.file-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.file-name {
+  font-weight: 500;
+  color: #333;
+}
+
+.file-size {
+  font-size: 12px;
+  color: #666;
+}
+
+.remove-file-btn {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease;
+}
+
+.remove-file-btn:hover {
+  background-color: #c82333;
+}
+
+@media (max-width: 768px) {
+  .file-uploader {
+    padding: 15px;
+  }
+  
+  .file-uploader-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  
+  .file-input-label {
+    justify-content: center;
+  }
+  
+  .file-item {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  
+  .remove-file-btn {
+    align-self: flex-end;
+  }
+} 
