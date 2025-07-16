@@ -1,14 +1,15 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import { createPost } from '../../api/postApi';
-import { validateForm } from '../../utils/validationUtils';
-import FileUploader from '../common/FileUploader';
-import RichTextEditor from '../common/RichTextEditor';
-import './PostForm.css';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { getPostDetail, updatePost } from '../api/postApi';
+import { validateForm } from '../utils/validationUtils';
+import FileUploader from '../components/common/FileUploader';
+import RichTextEditor from '../components/common/RichTextEditor';
+import '../components/posts/PostForm.css';
 
-const PostForm = () => {
+const EditPostPage = () => {
   const navigate = useNavigate();
+  const { postId } = useParams();
   const { user } = useAuth();
   const [formData, setFormData] = useState({
     category: '',
@@ -16,8 +17,10 @@ const PostForm = () => {
     content: ''
   });
   const [files, setFiles] = useState([]);
+  const [existingFiles, setExistingFiles] = useState([]);
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingPost, setIsLoadingPost] = useState(true);
 
   const categories = [
     { value: 'DEV', label: '개발' },
@@ -26,13 +29,60 @@ const PostForm = () => {
     { value: 'NOTICE', label: '공지' }
   ];
 
+  // 기존 게시글 정보 로드
+  useEffect(() => {
+    const loadPost = async () => {
+      if (!postId || !user) {
+        setIsLoadingPost(false);
+        return;
+      }
+
+      try {
+        const post = await getPostDetail(postId, user.userId);
+        
+        // 작성자 확인
+        if (post.authorUserId !== user.userId) {
+          alert('게시글을 수정할 권한이 없습니다.');
+          navigate('/mypage');
+          return;
+        }
+
+        setFormData({
+          category: post.category,
+          title: post.title,
+          content: post.content
+        });
+
+        // 기존 파일 정보 설정
+        if (post.fileUrls && post.fileUrls.length > 0) {
+          const existingFileList = post.fileUrls.map((url, index) => ({
+            id: `existing-${index}`,
+            name: url.split('/').pop() || `파일${index + 1}`,
+            url: url,
+            size: 0, // 기존 파일은 크기 정보가 없으므로 0으로 설정
+            isExisting: true
+          }));
+          setExistingFiles(existingFileList);
+        }
+      } catch (error) {
+        console.error('게시글 로드 오류:', error);
+        alert('게시글을 불러오는 중 오류가 발생했습니다.');
+        navigate('/mypage');
+      } finally {
+        setIsLoadingPost(false);
+      }
+    };
+
+    loadPost();
+  }, [postId, user, navigate]);
+
   // 로그인 체크
   if (!user) {
     return (
       <div className="post-form-container">
         <div className="auth-required">
           <h2>로그인이 필요합니다</h2>
-          <p>게시글을 작성하려면 로그인해주세요.</p>
+          <p>게시글을 수정하려면 로그인해주세요.</p>
           <button onClick={() => navigate('/login')} className="btn-primary">
             로그인하기
           </button>
@@ -76,6 +126,10 @@ const PostForm = () => {
     setFiles(selectedFiles);
   };
 
+  const handleRemoveExistingFile = (fileId) => {
+    setExistingFiles(prev => prev.filter(file => file.id !== fileId));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -90,33 +144,46 @@ const PostForm = () => {
     try {
       const postData = {
         ...formData,
-        fileUrls: files.map(file => file.url || file.base64)
+        fileUrls: [
+          ...existingFiles.map(file => file.url),
+          ...files.map(file => file.url || file.base64)
+        ]
       };
 
-      const response = await createPost(postData, user.userId);
+      const response = await updatePost(postId, postData, user.userId);
       if (response.id) {
-        alert('게시글이 성공적으로 작성되었습니다.');
-        navigate('/');
+        alert('게시글이 성공적으로 수정되었습니다.');
+        navigate(`/post/${postId}`);
       } else {
-        setErrors({ general: response.message || '게시글 작성에 실패했습니다.' });
+        setErrors({ general: response.message || '게시글 수정에 실패했습니다.' });
       }
     } catch (error) {
-      setErrors({ general: '게시글 작성 중 오류가 발생했습니다.' });
+      setErrors({ general: error.message || '게시글 수정 중 오류가 발생했습니다.' });
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleCancel = () => {
-    if (window.confirm('작성 중인 내용이 사라집니다. 정말 취소하시겠습니까?')) {
-      navigate('/');
+    if (window.confirm('수정 중인 내용이 사라집니다. 정말 취소하시겠습니까?')) {
+      navigate(`/post/${postId}`);
     }
   };
+
+  if (isLoadingPost) {
+    return (
+      <div className="post-form-container">
+        <div className="loading-message">
+          <h2>게시글을 불러오는 중...</h2>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="post-form-container">
       <div className="post-form-header">
-        <h2>게시글 작성</h2>
+        <h2>게시글 수정</h2>
         <button onClick={handleCancel} className="cancel-button">
           취소
         </button>
@@ -181,7 +248,31 @@ const PostForm = () => {
 
         <div className="form-group">
           <label>첨부파일</label>
-          <FileUploader onFileSelect={handleFileSelect} maxFiles={5} />
+          
+          {/* 기존 파일 목록 */}
+          {existingFiles.length > 0 && (
+            <div className="existing-files">
+              <h4>기존 파일</h4>
+              <div className="file-list">
+                {existingFiles.map((file) => (
+                  <div key={file.id} className="file-item existing">
+                    <span className="file-name">{file.name}</span>
+                    <button
+                      type="button"
+                      className="remove-file"
+                      onClick={() => handleRemoveExistingFile(file.id)}
+                      title="파일 제거"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {/* 새 파일 업로드 */}
+          <FileUploader onFileSelect={handleFileSelect} maxFiles={5 - existingFiles.length} />
         </div>
 
         <div className="form-actions">
@@ -189,7 +280,7 @@ const PostForm = () => {
             취소
           </button>
           <button type="submit" className="btn-primary" disabled={isLoading}>
-            {isLoading ? '작성 중...' : '게시글 작성'}
+            {isLoading ? '수정 중...' : '게시글 수정'}
           </button>
         </div>
       </form>
@@ -197,4 +288,4 @@ const PostForm = () => {
   );
 };
 
-export default PostForm; 
+export default EditPostPage; 

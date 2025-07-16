@@ -2,31 +2,42 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getPostDetail, toggleScrap } from '../../api/postApi';
 import { useAuth } from '../../contexts/AuthContext';
-import { base64ToFile, formatFileSize } from '../../utils/fileUtils';
+import { getCategoryDisplayName } from '../../utils/commonUtils';
+import CommentSection from './CommentSection';
 import './PostDetail.css';
+
+/**
+ * 게시글 상세 페이지
+ */
 
 const PostDetail = () => {
   const { postId } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
+  
   const [post, setPost] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isScrapped, setIsScrapped] = useState(false);
 
   useEffect(() => {
-    fetchPostDetail();
-  }, [postId]);
+          if (!authLoading) {
+        loadPost();
+      }
+  }, [postId, authLoading]);
 
-  const fetchPostDetail = async () => {
+  const loadPost = async () => {
     setIsLoading(true);
     setError(null);
+    
+    if (authLoading) {
+      setIsLoading(false);
+      return;
+    }
     
     try {
       const response = await getPostDetail(postId, user?.userId);
       if (response.id) {
         setPost(response);
-        setIsScrapped(response.isScrapped || false);
       } else {
         setError('게시글을 불러오는데 실패했습니다.');
       }
@@ -46,15 +57,16 @@ const PostDetail = () => {
     try {
       const response = await toggleScrap(postId, user.userId);
       if (response.isScrapped !== undefined) {
-        setIsScrapped(response.isScrapped);
         setPost(prev => ({
           ...prev,
-          scrapCount: response.isScrapped ? prev.scrapCount + 1 : prev.scrapCount - 1
+          isScrapped: response.isScrapped,
+          scrapCount: response.scrapCount || 0
         }));
       } else {
         alert(response.message || '스크랩 처리에 실패했습니다.');
       }
     } catch (error) {
+      console.error('스크랩 처리 중 오류:', error);
       alert('스크랩 처리 중 오류가 발생했습니다.');
     }
   };
@@ -70,31 +82,7 @@ const PostDetail = () => {
     });
   };
 
-  const getCategoryColor = (category) => {
-    const colors = {
-      'DEV': '#007bff',
-      'GENERAL': '#28a745',
-      'QNA': '#ffc107',
-      'NOTICE': '#dc3545'
-    };
-    return colors[category] || '#6c757d';
-  };
 
-  const downloadFile = (file) => {
-    try {
-      const blob = base64ToFile(file.base64, file.name, file.type);
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = file.name;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    } catch (error) {
-      alert('파일 다운로드 중 오류가 발생했습니다.');
-    }
-  };
 
   if (isLoading) {
     return (
@@ -109,7 +97,7 @@ const PostDetail = () => {
       <div className="post-detail-container">
         <div className="error-message">
           {error}
-          <button onClick={fetchPostDetail} className="retry-button">
+          <button onClick={loadPost} className="retry-button">
             다시 시도
           </button>
         </div>
@@ -137,10 +125,9 @@ const PostDetail = () => {
         <header className="post-header">
           <div className="post-title-section">
             <span 
-              className="category-badge"
-              style={{ backgroundColor: getCategoryColor(post.category) }}
+              className={`category-badge ${post.category ? post.category.toLowerCase() : ''}`}
             >
-              {post.category}
+              {post.categoryName || getCategoryDisplayName(post.category)}
             </span>
             <h1 className="post-title">{post.title}</h1>
           </div>
@@ -167,11 +154,10 @@ const PostDetail = () => {
         </header>
 
         <div className="post-content">
-          <div className="content-text">
-            {post.content.split('\n').map((line, index) => (
-              <p key={index}>{line}</p>
-            ))}
-          </div>
+          <div 
+            className="content-text"
+            dangerouslySetInnerHTML={{ __html: post.content }}
+          />
         </div>
 
         {post.fileUrls && post.fileUrls.length > 0 && (
@@ -197,34 +183,18 @@ const PostDetail = () => {
           </div>
         )}
 
-        {post.comments && post.comments.length > 0 && (
-          <div className="post-comments">
-            <h3>댓글 ({post.comments.length})</h3>
-            <div className="comment-list">
-              {post.comments.map((comment, index) => (
-                <div key={index} className="comment-item">
-                  <div className="comment-header">
-                    <span className="comment-author">{comment.authorName}</span>
-                    <span className="comment-date">{formatDate(comment.createdAt)}</span>
-                  </div>
-                  <div className="comment-content">
-                    {comment.content}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <div className="post-actions">
+                <div className="post-actions">
           <button
             onClick={handleScrap}
-            className={`scrap-button ${isScrapped ? 'scrapped' : ''}`}
+            className={`scrap-button ${post?.isScrapped === true ? 'scrapped' : ''}`}
           >
-            {isScrapped ? '스크랩 취소' : '스크랩'}
+            {post?.isScrapped === true ? '스크랩 취소' : '스크랩'}
           </button>
         </div>
       </article>
+
+      {/* 댓글 섹션 */}
+      <CommentSection postId={postId} />
     </div>
   );
 };

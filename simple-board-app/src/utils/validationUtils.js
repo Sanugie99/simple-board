@@ -29,19 +29,20 @@ export const validateTitle = (title) => {
   return title.length >= 1 && title.length <= 100;
 };
 
-// 내용 검증 (1-10000자)
+// 내용 검증 (1-10000자) - HTML 태그 제거 후 텍스트 길이 계산
 export const validateContent = (content) => {
-  return content.length >= 1 && content.length <= 10000;
+  const textContent = content.replace(/<[^>]*>/g, '').trim();
+  return textContent.length >= 1 && textContent.length <= 10000;
 };
 
 // 카테고리 검증
 export const validateCategory = (category) => {
-  const validCategories = ['일반', '공지', '질문', '자유'];
+  const validCategories = ['DEV', 'GENERAL', 'QNA', 'NOTICE'];
   return validCategories.includes(category);
 };
 
 // 전체 폼 검증
-export const validateForm = (formData, formType) => {
+export const validateForm = (formData, formType, fields = null) => {
   const errors = {};
 
   switch (formType) {
@@ -51,34 +52,78 @@ export const validateForm = (formData, formType) => {
       break;
 
     case 'signup':
-      if (!formData.userId) {
-        errors.userId = '아이디를 입력해주세요.';
-      } else if (!validateUserId(formData.userId)) {
-        errors.userId = '아이디는 4-20자의 영문과 숫자만 사용 가능합니다.';
-      }
-      
-      if (!formData.email) {
-        errors.email = '이메일을 입력해주세요.';
-      } else if (!validateEmail(formData.email)) {
-        errors.email = '올바른 이메일 형식을 입력해주세요.';
-      }
-      
-      if (!formData.password) {
-        errors.password = '비밀번호를 입력해주세요.';
-      } else if (!validatePassword(formData.password)) {
-        errors.password = '비밀번호는 8자 이상, 영문+숫자+특수문자 조합이어야 합니다.';
-      }
-      
-      if (!formData.passwordConfirm) {
-        errors.passwordConfirm = '비밀번호 확인을 입력해주세요.';
-      } else if (formData.password !== formData.passwordConfirm) {
-        errors.passwordConfirm = '비밀번호가 일치하지 않습니다.';
-      }
-      
-      if (!formData.name) {
-        errors.name = '이름을 입력해주세요.';
-      } else if (!validateName(formData.name)) {
-        errors.name = '이름은 2-10자의 한글 또는 영문만 사용 가능합니다.';
+      // 특정 필드만 검증하는 경우
+      if (fields) {
+        if (fields.includes('userId')) {
+          if (!formData.userId) {
+            errors.userId = '아이디를 입력해주세요.';
+          } else if (!validateUserId(formData.userId)) {
+            errors.userId = '아이디는 4-20자의 영문과 숫자만 사용 가능합니다.';
+          }
+        }
+        
+        if (fields.includes('email')) {
+          if (!formData.email) {
+            errors.email = '이메일을 입력해주세요.';
+          } else if (!validateEmail(formData.email)) {
+            errors.email = '올바른 이메일 형식을 입력해주세요.';
+          }
+        }
+        
+        if (fields.includes('password')) {
+          if (!formData.password) {
+            errors.password = '비밀번호를 입력해주세요.';
+          } else if (!validatePassword(formData.password)) {
+            errors.password = '비밀번호는 8자 이상, 영문+숫자+특수문자 조합이어야 합니다.';
+          }
+        }
+        
+        if (fields.includes('passwordConfirm')) {
+          if (!formData.passwordConfirm) {
+            errors.passwordConfirm = '비밀번호 확인을 입력해주세요.';
+          } else if (formData.password !== formData.passwordConfirm) {
+            errors.passwordConfirm = '비밀번호가 일치하지 않습니다.';
+          }
+        }
+        
+        if (fields.includes('name')) {
+          if (!formData.name) {
+            errors.name = '이름을 입력해주세요.';
+          } else if (!validateName(formData.name)) {
+            errors.name = '이름은 2-10자의 한글 또는 영문만 사용 가능합니다.';
+          }
+        }
+      } else {
+        // 전체 폼 검증
+        if (!formData.userId) {
+          errors.userId = '아이디를 입력해주세요.';
+        } else if (!validateUserId(formData.userId)) {
+          errors.userId = '아이디는 4-20자의 영문과 숫자만 사용 가능합니다.';
+        }
+        
+        if (!formData.email) {
+          errors.email = '이메일을 입력해주세요.';
+        } else if (!validateEmail(formData.email)) {
+          errors.email = '올바른 이메일 형식을 입력해주세요.';
+        }
+        
+        if (!formData.password) {
+          errors.password = '비밀번호를 입력해주세요.';
+        } else if (!validatePassword(formData.password)) {
+          errors.password = '비밀번호는 8자 이상, 영문+숫자+특수문자 조합이어야 합니다.';
+        }
+        
+        if (!formData.passwordConfirm) {
+          errors.passwordConfirm = '비밀번호 확인을 입력해주세요.';
+        } else if (formData.password !== formData.passwordConfirm) {
+          errors.passwordConfirm = '비밀번호가 일치하지 않습니다.';
+        }
+        
+        if (!formData.name) {
+          errors.name = '이름을 입력해주세요.';
+        } else if (!validateName(formData.name)) {
+          errors.name = '이름은 2-10자의 한글 또는 영문만 사용 가능합니다.';
+        }
       }
       break;
 

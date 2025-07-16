@@ -168,6 +168,16 @@
   margin-top: 20px;
   color: #666;
   font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.auth-link-group {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
 }
 
 .link-button {

@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -124,11 +125,10 @@ public class PostController {
             @PathVariable Long postId,
             @RequestParam String userId) {
         try {
-            boolean isScrapped = postService.toggleScrap(postId, userId);
-            Map<String, Object> response = new HashMap<>();
-            response.put("isScrapped", isScrapped);
-            response.put("message", isScrapped ? "스크랩되었습니다." : "스크랩이 해제되었습니다.");
-            return ResponseEntity.ok(response);
+            Map<String, Object> result = postService.toggleScrap(postId, userId);
+            boolean isScrapped = (Boolean) result.get("isScrapped");
+            result.put("message", isScrapped ? "스크랩되었습니다." : "스크랩이 해제되었습니다.");
+            return ResponseEntity.ok(result);
         } catch (Exception e) {
             Map<String, String> error = new HashMap<>();
             error.put("message", e.getMessage());
@@ -149,6 +149,37 @@ public class PostController {
             Map<String, String> error = new HashMap<>();
             error.put("message", e.getMessage());
             return ResponseEntity.badRequest().body(error);
+        }
+    }
+    
+    @GetMapping("/scrapped/ids")
+    public ResponseEntity<?> getScrappedPostIds(@RequestParam String userId) {
+        try {
+            List<Long> scrapedPostIds = postService.getScrappedPostIds(userId);
+            return ResponseEntity.ok(scrapedPostIds);
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
+    
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<?> getUserPosts(
+            @PathVariable String userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        try {
+            log.info("사용자 글 목록 조회 요청 - userId: {}, page: {}, size: {}", userId, page, size);
+            Pageable pageable = PageRequest.of(page, size);
+            Page<PostDto.PostListResponse> posts = postService.getUserPosts(userId, pageable);
+            log.info("사용자 글 목록 조회 성공 - 총 {}개 게시글", posts.getTotalElements());
+            return ResponseEntity.ok(posts);
+        } catch (Exception e) {
+            log.error("사용자 글 목록 조회 중 오류 발생: ", e);
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "사용자 글 목록을 불러오는 중 오류가 발생했습니다.");
+            return ResponseEntity.internalServerError().body(error);
         }
     }
 } 

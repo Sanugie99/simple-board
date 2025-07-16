@@ -35,9 +35,8 @@ public class PostFile {
     @Column(nullable = false)
     private String contentType;
     
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id", nullable = false)
-    private Post post;
+    @Column(name = "post_id", nullable = false)
+    private Long postId;
     
     @Column(name = "created_at")
     private LocalDateTime createdAt;

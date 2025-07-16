@@ -1,0 +1,132 @@
+/* Rich Text Editor 스타일 */
+.rich-text-editor {
+  margin-bottom: 20px;
+}
+
+.rich-text-editor .ql-container {
+  min-height: 200px;
+  font-size: 16px;
+  font-family: inherit;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  border: 2px solid #e0e0e0;
+  border-top: none;
+}
+
+.rich-text-editor .ql-toolbar {
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  border: 2px solid #e0e0e0;
+  border-bottom: none;
+  background-color: #f8f9fa;
+}
+
+.rich-text-editor .ql-editor {
+  padding: 16px;
+  min-height: 200px;
+  line-height: 1.6;
+}
+
+.rich-text-editor .ql-editor:focus {
+  outline: none;
+}
+
+.rich-text-editor .ql-editor p {
+  margin-bottom: 1em;
+}
+
+.rich-text-editor .ql-editor h1,
+.rich-text-editor .ql-editor h2,
+.rich-text-editor .ql-editor h3 {
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+}
+
+.rich-text-editor .ql-editor ul,
+.rich-text-editor .ql-editor ol {
+  padding-left: 1.5em;
+  margin-bottom: 1em;
+}
+
+.rich-text-editor .ql-editor blockquote {
+  border-left: 4px solid #007bff;
+  padding-left: 1em;
+  margin: 1em 0;
+  color: #666;
+}
+
+.rich-text-editor .ql-editor a {
+  color: #007bff;
+  text-decoration: underline;
+}
+
+.rich-text-editor .ql-editor img {
+  max-width: 100%;
+  height: auto;
+  margin: 1em 0;
+}
+
+/* 에러 상태 */
+.rich-text-editor.error .ql-container,
+.rich-text-editor.error .ql-toolbar {
+  border-color: #dc3545;
+}
+
+.rich-text-editor.error .ql-toolbar {
+  background-color: #f8d7da;
+}
+
+/* 툴바 버튼 스타일 */
+.rich-text-editor .ql-toolbar button {
+  margin: 2px;
+}
+
+.rich-text-editor .ql-toolbar button:hover {
+  color: #007bff;
+}
+
+.rich-text-editor .ql-toolbar button.ql-active {
+  color: #007bff;
+}
+
+/* 색상 선택기 */
+.rich-text-editor .ql-color .ql-picker-options,
+.rich-text-editor .ql-background .ql-picker-options {
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .rich-text-editor .ql-toolbar {
+    padding: 8px;
+  }
+  
+  .rich-text-editor .ql-editor {
+    padding: 12px;
+    min-height: 150px;
+  }
+  
+  .rich-text-editor .ql-toolbar button {
+    margin: 1px;
+    padding: 4px;
+  }
+}
+
+/* 에디터 높이 조정 */
+.rich-text-editor .ql-container.ql-snow {
+  border-color: #e0e0e0;
+}
+
+.rich-text-editor .ql-toolbar.ql-snow {
+  border-color: #e0e0e0;
+}
+
+/* 포커스 상태 */
+.rich-text-editor .ql-container:focus-within,
+.rich-text-editor .ql-toolbar:focus-within {
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+} 

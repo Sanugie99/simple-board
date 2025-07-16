@@ -2,6 +2,10 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { login as loginApi } from '../api/authApi';
 import { storage } from '../utils/commonUtils';
 
+/**
+ * 인증 Context
+ */
+
 const AuthContext = createContext();
 
 export const useAuth = () => {
@@ -17,17 +21,21 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // 로컬 스토리지에서 사용자 정보 확인
     const savedUser = storage.get('user');
-    if (savedUser) {
+    if (savedUser && savedUser.userId) {
       setUser(savedUser);
+    } else {
+      setUser(null);
     }
     setIsLoading(false);
   }, []);
 
+
+
   const login = async (userId, password) => {
     try {
       const response = await loginApi(userId, password);
+      
       if (response.success !== false) {
         const userData = {
           userId: response.userId,
@@ -36,12 +44,13 @@ export const AuthProvider = ({ children }) => {
         };
         setUser(userData);
         storage.set('user', userData);
+        
         return { success: true };
       } else {
         return { success: false, message: response.message };
       }
     } catch (error) {
-      console.error('로그인 오류:', error);
+      console.error('AuthContext - 로그인 오류:', error);
       return { success: false, message: '로그인에 실패했습니다.' };
     }
   };

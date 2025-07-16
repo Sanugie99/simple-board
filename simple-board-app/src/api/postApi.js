@@ -101,6 +101,29 @@ export const createPost = async (postData, userId) => {
   }
 };
 
+// 게시글 수정
+export const updatePost = async (postId, postData, userId) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/posts/${postId}?userId=${userId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(postData),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || '게시글 수정에 실패했습니다.');
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('게시글 수정 오류:', error);
+    throw error;
+  }
+};
+
 // 스크랩 추가/제거
 export const toggleScrap = async (postId, userId) => {
   try {
@@ -114,5 +137,71 @@ export const toggleScrap = async (postId, userId) => {
   } catch (error) {
     console.error('스크랩 토글 오류:', error);
     throw error;
+  }
+};
+
+// 사용자 스크랩 게시글 ID 목록 조회
+export const getScrappedPostIds = async (userId) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/posts/scrapped/ids?userId=${userId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('스크랩 게시글 ID 목록 조회 오류:', error);
+    return [];
+  }
+};
+
+// 사용자 스크랩 게시글 목록 조회
+export const getScrappedPosts = async (userId, page = 0, size = 10) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/posts/scrapped?userId=${userId}&page=${page}&size=${size}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    return data || { content: [] };
+  } catch (error) {
+    console.error('스크랩 게시글 목록 조회 오류:', error);
+    return { content: [] };
+  }
+};
+
+// 사용자가 작성한 글 목록 조회
+export const getUserPosts = async (userId, page = 0, size = 20) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/posts/user/${userId}?page=${page}&size=${size}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    return data || { content: [] };
+  } catch (error) {
+    console.error('사용자 글 목록 조회 오류:', error);
+    // 에러가 발생해도 기본 구조 반환
+    return { content: [] };
   }
 }; 

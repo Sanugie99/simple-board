@@ -32,7 +32,7 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + userId));
     }
     
-    public UserDto.LoginResponse signup(UserDto.SignupRequest request) {
+    public UserDto.UserInfoResponse signup(UserDto.SignupRequest request) {
         // 중복 검사
         if (userRepository.existsByUserId(request.getUserId())) {
             throw new RuntimeException("이미 존재하는 아이디입니다.");
@@ -53,11 +53,32 @@ public class UserService implements UserDetailsService {
         
         User savedUser = userRepository.save(user);
         
-        return UserDto.LoginResponse.builder()
+        return UserDto.UserInfoResponse.builder()
+                .id(savedUser.getId())
                 .userId(savedUser.getUserId())
-                .name(savedUser.getName())
                 .email(savedUser.getEmail())
+                .name(savedUser.getName())
+                .role(savedUser.getRole().name())
                 .build();
+    }
+    
+    public boolean checkUserIdAvailability(String userId) {
+        return !userRepository.existsByUserId(userId);
+    }
+    
+    public boolean checkEmailAvailability(String email) {
+        return !userRepository.existsByEmail(email);
+    }
+    
+    public boolean checkPassword(String userId, String password) {
+        User user = userRepository.findByUserId(userId)
+                .orElse(null);
+        
+        if (user == null) {
+            return false;
+        }
+        
+        return passwordEncoder.matches(password, user.getPassword());
     }
     
     public UserDto.LoginResponse login(UserDto.LoginRequest request) {
@@ -69,6 +90,7 @@ public class UserService implements UserDetailsService {
         }
         
         return UserDto.LoginResponse.builder()
+                .token("dummy-token-" + System.currentTimeMillis()) // 임시 토큰 생성
                 .userId(user.getUserId())
                 .name(user.getName())
                 .email(user.getEmail())
@@ -96,6 +118,21 @@ public class UserService implements UserDetailsService {
         if (!user.getEmail().equals(request.getEmail()) && 
             userRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("이미 존재하는 이메일입니다.");
+        }
+        
+        // 비밀번호 변경이 요청된 경우
+        if (request.getNewPassword() != null && !request.getNewPassword().trim().isEmpty()) {
+            if (request.getCurrentPassword() == null || request.getCurrentPassword().trim().isEmpty()) {
+                throw new RuntimeException("현재 비밀번호를 입력해주세요.");
+            }
+            
+            // 현재 비밀번호 확인
+            if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+                throw new RuntimeException("현재 비밀번호가 일치하지 않습니다.");
+            }
+            
+            // 새 비밀번호로 변경
+            user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         }
         
         user.setName(request.getName());
@@ -157,5 +194,31 @@ public class UserService implements UserDetailsService {
             sb.append(chars.charAt((int) (Math.random() * chars.length())));
         }
         return sb.toString();
+    }
+    
+    public String findUserIdByEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("해당 이메일로 가입된 계정이 없습니다."));
+        
+        return user.getUserId();
+    }
+    
+    public void resetPassword(String userId, String email, String newPassword) {
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        
+        // 이메일 일치 확인
+        if (!user.getEmail().equals(email)) {
+            throw new RuntimeException("아이디와 이메일이 일치하지 않습니다.");
+        }
+        
+        // 기존 비밀번호와 동일한지 확인
+        if (passwordEncoder.matches(newPassword, user.getPassword())) {
+            throw new RuntimeException("기존에 사용중인 비밀번호입니다.");
+        }
+        
+        // 새 비밀번호로 변경
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
     }
 } 

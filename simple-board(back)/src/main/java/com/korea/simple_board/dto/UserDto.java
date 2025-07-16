@@ -59,6 +59,8 @@ public class UserDto {
     public static class UpdateRequest {
         private String name;
         private String email;
+        private String currentPassword;
+        private String newPassword;
     }
     
     @Data

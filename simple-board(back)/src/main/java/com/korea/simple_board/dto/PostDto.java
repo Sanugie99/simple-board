@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -45,10 +44,14 @@ public class PostDto {
         private String authorName;
         private String authorUserId;
         private Post.Category category;
+        private String categoryName;
         private Integer viewCount;
+        private Integer scrapCount;
+        private Long commentCount;
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
         private List<String> fileUrls;
+        @lombok.Getter
         private boolean isScrapped;
     }
     
@@ -61,7 +64,10 @@ public class PostDto {
         private String title;
         private String authorName;
         private Post.Category category;
+        private String categoryName;
         private Integer viewCount;
+        private Integer scrapCount;
+        private Long commentCount;
         private LocalDateTime createdAt;
         private boolean isScrapped;
     }

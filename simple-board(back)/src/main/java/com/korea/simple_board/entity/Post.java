@@ -53,9 +53,7 @@ public class Post {
     @Builder.Default
     private List<Scrap> scraps = new ArrayList<>();
     
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<PostFile> files = new ArrayList<>();
+
     
     @PrePersist
     protected void onCreate() {
@@ -76,6 +74,19 @@ public class Post {
     }
     
     public enum Category {
-        DEV, GENERAL, QNA, NOTICE
+        DEV("개발"), 
+        GENERAL("일반"), 
+        QNA("질문"), 
+        NOTICE("공지");
+        
+        private final String displayName;
+        
+        Category(String displayName) {
+            this.displayName = displayName;
+        }
+        
+        public String getDisplayName() {
+            return displayName;
+        }
     }
 } 

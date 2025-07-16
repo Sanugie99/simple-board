@@ -27,11 +27,19 @@ const SignupForm = () => {
       [name]: value
     }));
     
-    // 입력 시 해당 필드의 에러와 체크 상태 초기화
+    // 입력 시 해당 필드의 에러만 초기화 (중복확인 상태는 유지)
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
         [name]: ''
+      }));
+    }
+    
+    // 아이디나 이메일이 변경되면 중복확인 상태 초기화
+    if ((name === 'userId' || name === 'email') && checkedFields[name]) {
+      setCheckedFields(prev => ({
+        ...prev,
+        [name]: false
       }));
     }
     
@@ -46,13 +54,13 @@ const SignupForm = () => {
 
   const handleIdCheck = async () => {
     if (!formData.userId) {
-      setErrors({ userId: '아이디를 입력해주세요.' });
+      setErrors(prev => ({ ...prev, userId: '아이디를 입력해주세요.' }));
       return;
     }
 
-    const validation = validateForm({ userId: formData.userId }, 'signup');
+    const validation = validateForm({ userId: formData.userId }, 'signup', ['userId']);
     if (!validation.isValid) {
-      setErrors(validation.errors);
+      setErrors(prev => ({ ...prev, ...validation.errors }));
       return;
     }
 
@@ -63,11 +71,11 @@ const SignupForm = () => {
         setCheckedFields(prev => ({ ...prev, userId: true }));
         setErrors(prev => ({ ...prev, userId: '' }));
       } else {
-        setErrors({ userId: response.message || '이미 사용 중인 아이디입니다.' });
+        setErrors(prev => ({ ...prev, userId: response.message || '이미 사용 중인 아이디입니다.' }));
         setCheckedFields(prev => ({ ...prev, userId: false }));
       }
     } catch (error) {
-      setErrors({ userId: '아이디 확인 중 오류가 발생했습니다.' });
+      setErrors(prev => ({ ...prev, userId: '아이디 확인 중 오류가 발생했습니다.' }));
       setCheckedFields(prev => ({ ...prev, userId: false }));
     } finally {
       setIsLoading(false);
@@ -76,13 +84,13 @@ const SignupForm = () => {
 
   const handleEmailCheck = async () => {
     if (!formData.email) {
-      setErrors({ email: '이메일을 입력해주세요.' });
+      setErrors(prev => ({ ...prev, email: '이메일을 입력해주세요.' }));
       return;
     }
 
-    const validation = validateForm({ email: formData.email }, 'signup');
+    const validation = validateForm({ email: formData.email }, 'signup', ['email']);
     if (!validation.isValid) {
-      setErrors(validation.errors);
+      setErrors(prev => ({ ...prev, ...validation.errors }));
       return;
     }
 
@@ -93,11 +101,11 @@ const SignupForm = () => {
         setCheckedFields(prev => ({ ...prev, email: true }));
         setErrors(prev => ({ ...prev, email: '' }));
       } else {
-        setErrors({ email: response.message || '이미 사용 중인 이메일입니다.' });
+        setErrors(prev => ({ ...prev, email: response.message || '이미 사용 중인 이메일입니다.' }));
         setCheckedFields(prev => ({ ...prev, email: false }));
       }
     } catch (error) {
-      setErrors({ email: '이메일 확인 중 오류가 발생했습니다.' });
+      setErrors(prev => ({ ...prev, email: '이메일 확인 중 오류가 발생했습니다.' }));
       setCheckedFields(prev => ({ ...prev, email: false }));
     } finally {
       setIsLoading(false);
@@ -109,17 +117,17 @@ const SignupForm = () => {
     
     const validation = validateForm(formData, 'signup');
     if (!validation.isValid) {
-      setErrors(validation.errors);
+      setErrors(prev => ({ ...prev, ...validation.errors }));
       return;
     }
 
     if (!checkedFields.userId) {
-      setErrors({ userId: '아이디 중복 확인을 해주세요.' });
+      setErrors(prev => ({ ...prev, userId: '아이디 중복 확인을 해주세요.' }));
       return;
     }
 
     if (!checkedFields.email) {
-      setErrors({ email: '이메일 중복 확인을 해주세요.' });
+      setErrors(prev => ({ ...prev, email: '이메일 중복 확인을 해주세요.' }));
       return;
     }
 
@@ -130,10 +138,10 @@ const SignupForm = () => {
         alert('회원가입이 완료되었습니다. 로그인해주세요.');
         navigate('/login');
       } else {
-        setErrors({ general: response.message || '회원가입에 실패했습니다.' });
+        setErrors(prev => ({ ...prev, general: response.message || '회원가입에 실패했습니다.' }));
       }
     } catch (error) {
-      setErrors({ general: '회원가입 중 오류가 발생했습니다.' });
+      setErrors(prev => ({ ...prev, general: '회원가입 중 오류가 발생했습니다.' }));
     } finally {
       setIsLoading(false);
     }

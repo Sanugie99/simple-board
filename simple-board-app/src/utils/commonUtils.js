@@ -1,4 +1,10 @@
-// 날짜 포맷팅
+/**
+ * 공통 유틸리티
+ */
+
+/**
+ * 날짜 포맷팅
+ */
 export const formatDate = (dateString) => {
   const date = new Date(dateString);
   return date.toLocaleDateString('ko-KR', {
@@ -10,42 +16,58 @@ export const formatDate = (dateString) => {
   });
 };
 
-// 카테고리 색상 반환
+/**
+ * 카테고리 색상
+ */
 export const getCategoryColor = (category) => {
   const colors = {
     'DEV': '#007bff',
     'GENERAL': '#28a745',
     'QNA': '#ffc107',
-    'NOTICE': '#dc3545'
+    'NOTICE': '#dc3545',
+    '개발': '#007bff',
+    '일반': '#28a745',
+    '질문': '#ffc107',
+    '공지': '#dc3545'
   };
   return colors[category] || '#6c757d';
 };
 
-// 카테고리 목록
-export const CATEGORIES = ['전체', 'DEV', 'GENERAL', 'QNA', 'NOTICE'];
+/** 카테고리 목록 (한글) */
+export const CATEGORIES = ['전체', '개발', '일반', '질문', '공지'];
 
-// 게시글 정렬 (공지사항 우선)
+/**
+ * 카테고리 표시명
+ */
+export const getCategoryDisplayName = (category) => {
+  const categoryMap = {
+    'DEV': '개발',
+    'GENERAL': '일반',
+    'QNA': '질문',
+    'NOTICE': '공지'
+  };
+  return categoryMap[category] || category;
+};
+
+/**
+ * 게시글 정렬
+ */
 export const sortPostsByPriority = (posts) => {
-  // posts가 undefined이거나 배열이 아닌 경우 빈 배열 반환
   if (!posts || !Array.isArray(posts)) {
     return [];
   }
   
-  // 공지사항과 일반 게시글 분리
-  const noticePosts = posts.filter(post => post && post.category === 'NOTICE');
-  const regularPosts = posts.filter(post => post && post.category !== 'NOTICE');
+  const noticePosts = posts.filter(post => post && (post.category === 'NOTICE' || post.category === '공지'));
+  const regularPosts = posts.filter(post => post && post.category !== 'NOTICE' && post.category !== '공지');
   
-  // 공지사항 중 최신 1개만 선택
   const latestNotice = noticePosts.length > 0 
     ? [noticePosts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0]]
     : [];
   
-  // 일반 게시글들을 최신순으로 정렬
   const sortedRegularPosts = regularPosts.sort((a, b) => 
     new Date(b.createdAt) - new Date(a.createdAt)
   );
   
-  // 최신 공지사항 1개 + 일반 게시글들 순서로 합치기
   return [...latestNotice, ...sortedRegularPosts];
 };
 
@@ -64,7 +86,9 @@ export const showError = (message) => {
   alert(message);
 };
 
-// 로컬 스토리지 관리
+/**
+ * 로컬 스토리지
+ */
 export const storage = {
   get: (key) => {
     try {

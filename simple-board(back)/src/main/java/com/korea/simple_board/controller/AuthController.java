@@ -19,42 +19,28 @@ public class AuthController {
     
     private final UserService userService;
     
-    @PostMapping("/signup")
-    public ResponseEntity<?> signup(@RequestBody UserDto.SignupRequest request) {
-        try {
-            UserDto.LoginResponse response = userService.signup(request);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            Map<String, String> error = new HashMap<>();
-            error.put("message", e.getMessage());
-            return ResponseEntity.badRequest().body(error);
-        }
-    }
-    
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody UserDto.LoginRequest request) {
-        try {
-            UserDto.LoginResponse response = userService.login(request);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            Map<String, String> error = new HashMap<>();
-            error.put("message", e.getMessage());
-            return ResponseEntity.badRequest().body(error);
-        }
-    }
-    
     @PostMapping("/check-id")
-    public ResponseEntity<?> checkId(@RequestBody Map<String, String> request) {
+    public ResponseEntity<?> checkUserId(@RequestBody Map<String, String> request) {
         try {
             String userId = request.get("userId");
-            // 실제로는 중복 검사 로직이 필요하지만, 여기서는 간단히 처리
-            Map<String, Boolean> response = new HashMap<>();
-            response.put("available", true);
+            if (userId == null || userId.trim().isEmpty()) {
+                Map<String, Object> error = new HashMap<>();
+                error.put("success", false);
+                error.put("message", "아이디를 입력해주세요.");
+                return ResponseEntity.badRequest().body(error);
+            }
+            
+            boolean isAvailable = userService.checkUserIdAvailability(userId);
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", isAvailable);
+            response.put("message", isAvailable ? "사용 가능한 아이디입니다." : "이미 사용 중인 아이디입니다.");
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            Map<String, String> error = new HashMap<>();
-            error.put("message", e.getMessage());
-            return ResponseEntity.badRequest().body(error);
+            log.error("아이디 중복 확인 중 오류 발생: ", e);
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
+            error.put("message", "아이디 확인 중 오류가 발생했습니다.");
+            return ResponseEntity.internalServerError().body(error);
         }
     }
     
@@ -62,40 +48,95 @@ public class AuthController {
     public ResponseEntity<?> checkEmail(@RequestBody Map<String, String> request) {
         try {
             String email = request.get("email");
-            // 실제로는 중복 검사 로직이 필요하지만, 여기서는 간단히 처리
-            Map<String, Boolean> response = new HashMap<>();
-            response.put("available", true);
+            if (email == null || email.trim().isEmpty()) {
+                Map<String, Object> error = new HashMap<>();
+                error.put("success", false);
+                error.put("message", "이메일을 입력해주세요.");
+                return ResponseEntity.badRequest().body(error);
+            }
+            
+            boolean isAvailable = userService.checkEmailAvailability(email);
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", isAvailable);
+            response.put("message", isAvailable ? "사용 가능한 이메일입니다." : "이미 사용 중인 이메일입니다.");
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            Map<String, String> error = new HashMap<>();
+            log.error("이메일 중복 확인 중 오류 발생: ", e);
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
+            error.put("message", "이메일 확인 중 오류가 발생했습니다.");
+            return ResponseEntity.internalServerError().body(error);
+        }
+    }
+    
+    @PostMapping("/signup")
+    public ResponseEntity<?> signup(@RequestBody UserDto.SignupRequest request) {
+        try {
+            UserDto.UserInfoResponse userInfo = userService.signup(request);
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "회원가입이 완료되었습니다.");
+            response.put("user", userInfo);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("회원가입 중 오류 발생: ", e);
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
             error.put("message", e.getMessage());
             return ResponseEntity.badRequest().body(error);
         }
     }
     
-    @PostMapping("/find-id")
-    public ResponseEntity<?> findId(@RequestBody UserDto.FindIdRequest request) {
+    @PostMapping("/check-password")
+    public ResponseEntity<?> checkPassword(@RequestBody Map<String, String> request) {
         try {
-            userService.findId(request);
-            Map<String, String> response = new HashMap<>();
-            response.put("message", "아이디가 이메일로 발송되었습니다.");
+            String userId = request.get("userId");
+            String password = request.get("password");
+            
+            if (userId == null || userId.trim().isEmpty()) {
+                Map<String, Object> error = new HashMap<>();
+                error.put("success", false);
+                error.put("message", "아이디를 입력해주세요.");
+                return ResponseEntity.badRequest().body(error);
+            }
+            
+            if (password == null || password.trim().isEmpty()) {
+                Map<String, Object> error = new HashMap<>();
+                error.put("success", false);
+                error.put("message", "비밀번호를 입력해주세요.");
+                return ResponseEntity.badRequest().body(error);
+            }
+            
+            boolean isValid = userService.checkPassword(userId, password);
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", isValid);
+            response.put("message", isValid ? "비밀번호가 일치합니다." : "비밀번호가 일치하지 않습니다.");
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            Map<String, String> error = new HashMap<>();
-            error.put("message", e.getMessage());
-            return ResponseEntity.badRequest().body(error);
+            log.error("비밀번호 확인 중 오류 발생: ", e);
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
+            error.put("message", "비밀번호 확인 중 오류가 발생했습니다.");
+            return ResponseEntity.internalServerError().body(error);
         }
     }
     
-    @PostMapping("/find-password")
-    public ResponseEntity<?> findPassword(@RequestBody UserDto.FindPasswordRequest request) {
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody UserDto.LoginRequest request) {
         try {
-            userService.findPassword(request);
-            Map<String, String> response = new HashMap<>();
-            response.put("message", "임시 비밀번호가 이메일로 발송되었습니다.");
+            UserDto.LoginResponse loginResponse = userService.login(request);
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "로그인되었습니다.");
+            response.put("token", loginResponse.getToken());
+            response.put("userId", loginResponse.getUserId());
+            response.put("name", loginResponse.getName());
+            response.put("email", loginResponse.getEmail());
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            Map<String, String> error = new HashMap<>();
+            log.error("로그인 중 오류 발생: ", e);
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
             error.put("message", e.getMessage());
             return ResponseEntity.badRequest().body(error);
         }

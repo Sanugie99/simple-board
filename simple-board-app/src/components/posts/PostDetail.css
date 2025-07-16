@@ -2,10 +2,12 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
+  background: transparent;
 }
 
 .post-detail-header {
   margin-bottom: 20px;
+  background: transparent;
 }
 
 .back-button {
@@ -66,6 +68,7 @@
   margin-bottom: 40px;
   padding-bottom: 25px;
   border-bottom: 1px solid #f0f0f0;
+  background: transparent;
 }
 
 .post-title-section {
@@ -73,6 +76,8 @@
   align-items: center;
   gap: 15px;
   margin-bottom: 20px;
+  background: transparent !important;
+  padding: 0 !important;
 }
 
 .category-badge {
@@ -82,8 +87,26 @@
   font-size: 14px;
   font-weight: 600;
   text-transform: uppercase;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   flex-shrink: 0;
+  border: none;
+  box-shadow: none;
+  margin: 0 !important;
+}
+
+.category-badge.dev {
+  background-color: #007bff !important;
+}
+
+.category-badge.general {
+  background-color: #28a745 !important;
+}
+
+.category-badge.qna {
+  background-color: #ffc107 !important;
+}
+
+.category-badge.notice {
+  background-color: #dc3545 !important;
 }
 
 .post-title {
@@ -104,12 +127,14 @@
   flex-wrap: wrap;
   gap: 30px;
   margin-top: 20px;
+  background: transparent;
 }
 
 .post-info {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  background: transparent;
 }
 
 .post-author, .post-date {
@@ -125,6 +150,7 @@
 .post-stats {
   display: flex;
   gap: 30px;
+  background: transparent;
 }
 
 .stat {
@@ -143,6 +169,7 @@
 .post-content {
   margin-bottom: 40px;
   padding: 25px 0;
+  background: transparent;
 }
 
 .content-text {
@@ -157,6 +184,78 @@
 
 .content-text p:last-child {
   margin-bottom: 0;
+}
+
+/* WYSIWYG 에디터 내용 스타일 */
+.content-text h1,
+.content-text h2,
+.content-text h3 {
+  margin: 1.5em 0 0.5em 0;
+  color: #333;
+  font-weight: 600;
+}
+
+.content-text h1 {
+  font-size: 2em;
+}
+
+.content-text h2 {
+  font-size: 1.5em;
+}
+
+.content-text h3 {
+  font-size: 1.25em;
+}
+
+.content-text ul,
+.content-text ol {
+  margin: 1em 0;
+  padding-left: 2em;
+}
+
+.content-text li {
+  margin: 0.5em 0;
+}
+
+.content-text blockquote {
+  border-left: 4px solid #007bff;
+  padding-left: 1em;
+  margin: 1em 0;
+  color: #666;
+  font-style: italic;
+}
+
+.content-text a {
+  color: #007bff;
+  text-decoration: underline;
+}
+
+.content-text a:hover {
+  color: #0056b3;
+}
+
+.content-text img {
+  max-width: 100%;
+  height: auto;
+  margin: 1em 0;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.content-text strong {
+  font-weight: 600;
+}
+
+.content-text em {
+  font-style: italic;
+}
+
+.content-text u {
+  text-decoration: underline;
+}
+
+.content-text s {
+  text-decoration: line-through;
 }
 
 .post-files {
@@ -276,9 +375,9 @@
   border-top: 1px solid #e0e0e0;
 }
 
-.scrap-button {
+.post-detail .scrap-button {
   padding: 12px 24px;
-  background-color: #6c757d;
+  background-color: #6c757d !important;
   color: white;
   border: none;
   border-radius: 8px;
@@ -288,17 +387,17 @@
   transition: all 0.3s ease;
 }
 
-.scrap-button:hover {
-  background-color: #5a6268;
+.post-detail .scrap-button:hover {
+  background-color: #5a6268 !important;
   transform: translateY(-1px);
 }
 
-.scrap-button.scrapped {
-  background-color: #28a745;
+.post-detail .scrap-button.scrapped {
+  background-color: #28a745 !important;
 }
 
-.scrap-button.scrapped:hover {
-  background-color: #218838;
+.post-detail .scrap-button.scrapped:hover {
+  background-color: #218838 !important;
 }
 
 @media (max-width: 768px) {

@@ -6,6 +6,7 @@ import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import MainPage from './pages/MainPage';
 import CreatePostPage from './pages/CreatePostPage';
+import EditPostPage from './pages/EditPostPage';
 import PostDetailPage from './pages/PostDetailPage';
 import MyPage from './pages/MyPage';
 import './App.css';
@@ -48,6 +49,14 @@ const AppContent = () => {
             element={
               <ProtectedRoute>
                 <CreatePostPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/edit-post/:postId" 
+            element={
+              <ProtectedRoute>
+                <EditPostPage />
               </ProtectedRoute>
             } 
           />

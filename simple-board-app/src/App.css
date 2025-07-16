@@ -27,6 +27,14 @@ body {
   padding-bottom: 40px;
 }
 
+/* 카테고리 배지 관련 모든 배경 제거 */
+.post-category,
+.post-title-section,
+.post-header {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
 /* 로딩 스타일 */
 .loading {
   display: flex;

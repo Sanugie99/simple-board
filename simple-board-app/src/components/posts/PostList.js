@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { getPosts, getPostsByCategory } from '../../api/postApi';
-import { formatDate, getCategoryColor, CATEGORIES, sortPostsByPriority } from '../../utils/commonUtils';
+import { getPosts, getPostsByCategory, toggleScrap } from '../../api/postApi';
+import { formatDate, getCategoryColor, CATEGORIES, sortPostsByPriority, getCategoryDisplayName } from '../../utils/commonUtils';
 import LoadingSpinner from '../common/LoadingSpinner';
 import ErrorMessage from '../common/ErrorMessage';
 import './PostList.css';
@@ -27,7 +27,15 @@ const PostList = () => {
       if (selectedCategory === '전체') {
         response = await getPosts(null, 0, 10, user?.userId);
       } else {
-        response = await getPostsByCategory(selectedCategory, 0, 10, user?.userId);
+        // 한글 카테고리를 영문으로 변환
+        const categoryMap = {
+          '개발': 'DEV',
+          '일반': 'GENERAL',
+          '질문': 'QNA',
+          '공지': 'NOTICE'
+        };
+        const englishCategory = categoryMap[selectedCategory];
+        response = await getPostsByCategory(englishCategory, 0, 10, user?.userId);
       }
       
       // response가 존재하고 content가 있는지 확인
@@ -47,6 +55,35 @@ const PostList = () => {
     }
   };
 
+  const handleScrap = async (postId, currentIsScrapped) => {
+    if (!user) {
+      alert('로그인이 필요합니다.');
+      return;
+    }
+
+    try {
+      const response = await toggleScrap(postId, user.userId);
+      if (response.isScrapped !== undefined) {
+        // 해당 게시글의 스크랩 상태와 스크랩 수 업데이트
+        setPosts(prevPosts => 
+          prevPosts.map(post => 
+            post.id === postId 
+              ? {
+                  ...post,
+                  isScrapped: response.isScrapped,
+                  scrapCount: response.scrapCount || 0
+                }
+              : post
+          )
+        );
+      } else {
+        alert(response.message || '스크랩 처리에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('스크랩 처리 중 오류:', error);
+      alert('스크랩 처리 중 오류가 발생했습니다.');
+    }
+  };
 
 
   if (isLoading) {
@@ -98,10 +135,9 @@ const PostList = () => {
               <div className="post-header">
                 <div className="post-category">
                   <span 
-                    className="category-badge"
-                    style={{ backgroundColor: getCategoryColor(post.category) }}
+                    className={`category-badge ${post.category ? post.category.toLowerCase() : ''}`}
                   >
-                    {post.category}
+                    {post.categoryName || getCategoryDisplayName(post.category)}
                   </span>
                 </div>
                 <div className="post-meta">
@@ -135,6 +171,17 @@ const PostList = () => {
                     {post.scrapCount || 0}
                   </span>
                 </div>
+                {user && (
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleScrap(post.id, post.isScrapped);
+                    }}
+                    className={`scrap-button ${post.isScrapped ? 'scrapped' : ''}`}
+                  >
+                    {post.isScrapped ? '스크랩 취소' : '스크랩'}
+                  </button>
+                )}
               </div>
             </div>
           ))}
