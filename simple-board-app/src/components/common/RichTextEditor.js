@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import './RichTextEditor.css';
 
 const RichTextEditor = ({ value, onChange, placeholder, error }) => {
+  const quillRef = useRef(null);
+
   // Quill 에디터 모듈 설정
   const modules = {
     toolbar: [
@@ -30,6 +32,7 @@ const RichTextEditor = ({ value, onChange, placeholder, error }) => {
   return (
     <div className="rich-text-editor">
       <ReactQuill
+        ref={quillRef}
         theme="snow"
         value={value}
         onChange={onChange}

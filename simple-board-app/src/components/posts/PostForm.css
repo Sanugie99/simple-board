@@ -250,6 +250,7 @@
   background: #c82333;
 }
 
+/* 모바일 반응형 */
 @media (max-width: 768px) {
   .post-form-container {
     padding: 15px;
@@ -273,14 +274,50 @@
   .form-group select,
   .form-group textarea {
     font-size: 16px; /* 모바일에서 확대 방지 */
+    padding: 12px;
   }
   
   .form-actions {
     flex-direction: column;
+    gap: 10px;
   }
   
   .btn-primary,
   .btn-secondary {
     width: 100%;
+    padding: 14px 20px;
+    font-size: 16px;
+  }
+  
+  .auth-required {
+    padding: 40px 20px;
+  }
+  
+  .auth-required h2 {
+    font-size: 20px;
+  }
+  
+  .auth-required p {
+    font-size: 14px;
+  }
+}
+
+/* 태블릿 반응형 */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .post-form-container {
+    padding: 20px;
+  }
+  
+  .post-form {
+    padding: 25px;
+  }
+  
+  .form-actions {
+    gap: 12px;
+  }
+  
+  .btn-primary,
+  .btn-secondary {
+    padding: 12px 20px;
   }
 } 

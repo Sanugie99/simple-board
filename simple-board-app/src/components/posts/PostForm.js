@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
 import { createPost } from '../../api/postApi';
 import { validateForm } from '../../utils/validationUtils';
+import { useAuth } from '../../contexts/AuthContext';
 import FileUploader from '../common/FileUploader';
 import RichTextEditor from '../common/RichTextEditor';
 import './PostForm.css';

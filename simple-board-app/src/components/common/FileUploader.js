@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { uploadFile } from '../../api/fileApi';
 import { validateFileSize, validateFileType, formatFileSize } from '../../utils/fileUtils';
 import './FileUploader.css';
@@ -7,9 +7,10 @@ const FileUploader = ({ onFileSelect, maxFiles = 5, maxSize = 5 * 1024 * 1024 })
   const [files, setFiles] = useState([]);
   const [errors, setErrors] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const fileInputRef = useRef(null);
 
-  const handleFileSelect = async (event) => {
-    const selectedFiles = Array.from(event.target.files);
+  const processFiles = async (selectedFiles) => {
     const newErrors = [];
     const validFiles = [];
 
@@ -65,10 +66,35 @@ const FileUploader = ({ onFileSelect, maxFiles = 5, maxSize = 5 * 1024 * 1024 })
       setFiles(updatedFiles);
       onFileSelect(updatedFiles);
     }
+  };
 
+  const handleFileSelect = async (event) => {
+    const selectedFiles = Array.from(event.target.files);
+    await processFiles(selectedFiles);
     // 파일 입력 초기화
     event.target.value = '';
   };
+
+  const handleDragOver = useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+  }, []);
+
+  const handleDrop = useCallback(async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+    
+    const droppedFiles = Array.from(e.dataTransfer.files);
+    await processFiles(droppedFiles);
+  }, [files]);
 
   const removeFile = (fileId) => {
     const updatedFiles = files.filter(file => file.id !== fileId);
@@ -80,14 +106,31 @@ const FileUploader = ({ onFileSelect, maxFiles = 5, maxSize = 5 * 1024 * 1024 })
     setErrors([]);
   };
 
+  const handleLabelClick = () => {
+    if (!isUploading) {
+      fileInputRef.current?.click();
+    }
+  };
+
   return (
-    <div className="file-uploader">
+    <div 
+      className={`file-uploader ${isDragOver ? 'drag-over' : ''}`}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
       <div className="file-uploader-header">
-        <label htmlFor="file-input" className="file-input-label" style={{ opacity: isUploading ? 0.5 : 1 }}>
+        <label 
+          htmlFor="file-input" 
+          className="file-input-label" 
+          style={{ opacity: isUploading ? 0.5 : 1 }}
+          onClick={handleLabelClick}
+        >
           <span className="upload-icon">📁</span>
           {isUploading ? '업로드 중...' : '파일 선택'}
         </label>
         <input
+          ref={fileInputRef}
           id="file-input"
           type="file"
           multiple
@@ -99,6 +142,14 @@ const FileUploader = ({ onFileSelect, maxFiles = 5, maxSize = 5 * 1024 * 1024 })
         <span className="file-info">
           최대 {maxFiles}개, {formatFileSize(maxSize)}까지
         </span>
+      </div>
+
+      <div className="drag-drop-area">
+        <div className="drag-drop-text">
+          <span className="drag-icon">📤</span>
+          <p>파일을 여기에 드래그하거나 위의 버튼을 클릭하세요</p>
+          <p className="drag-hint">지원 형식: 이미지, PDF, DOC, DOCX, TXT</p>
+        </div>
       </div>
 
       {errors.length > 0 && (

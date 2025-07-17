@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { getPosts, toggleScrap } from '../../api/postApi';
 import { useAuth } from '../../contexts/AuthContext';
-import { getPosts, getPostsByCategory, toggleScrap } from '../../api/postApi';
 import { formatDate, getCategoryColor, CATEGORIES, sortPostsByPriority, getCategoryDisplayName } from '../../utils/commonUtils';
 import LoadingSpinner from '../common/LoadingSpinner';
 import ErrorMessage from '../common/ErrorMessage';
@@ -35,7 +35,7 @@ const PostList = () => {
           '공지': 'NOTICE'
         };
         const englishCategory = categoryMap[selectedCategory];
-        response = await getPostsByCategory(englishCategory, 0, 10, user?.userId);
+        response = await getPosts(englishCategory, 0, 10, user?.userId);
       }
       
       // response가 존재하고 content가 있는지 확인
@@ -84,7 +84,6 @@ const PostList = () => {
       alert('스크랩 처리 중 오류가 발생했습니다.');
     }
   };
-
 
   if (isLoading) {
     return (

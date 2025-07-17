@@ -18,7 +18,7 @@ const LoginForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     const validation = validateForm(formData, 'login');
     if (!validation.isValid) {
       setFormErrors(validation.errors);
@@ -26,6 +26,7 @@ const LoginForm = () => {
     }
 
     startLoading();
+
     try {
       const result = await authLogin(formData.userId, formData.password);
       if (result.success) {
